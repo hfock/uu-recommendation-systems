@@ -5,7 +5,7 @@ import json
 
 
 def extract_data(files):
-    data = []
+    extracted_data = []
     for index, file in enumerate(files):
         if './data/show' not in file:
             soup = BeautifulSoup(open(file), 'html.parser')
@@ -94,15 +94,15 @@ def extract_data(files):
                 'topic': file.split('/', 5)[4]
             }
             # append the article to the data
-            data.append(article)
-    return data
+            extracted_data.append(article)
+    return extracted_data
 
 
 if __name__ == '__main__':
     files = []
 
     # load html files
-    ROOT = "./../data/BBC/*"
+    ROOT = "./../../data/BBC/*"
     folders = glob.glob(ROOT)
     for folder in folders:
         files.append(glob.glob(f'{folder}/*.html'))
