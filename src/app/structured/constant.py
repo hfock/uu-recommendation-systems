@@ -1,4 +1,4 @@
 CPLXTY = 'Complexity'
 DVRSTY = 'Diversity'
 
-DATA = './../../data/'
+DATA_BOOK = './../../data/books/'

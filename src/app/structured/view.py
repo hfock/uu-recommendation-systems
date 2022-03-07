@@ -53,7 +53,3 @@ class View:
         df = df.merge(df_books, on='ISBN')
         self.recommendations(df)
 
-
-'''
-    
-'''
