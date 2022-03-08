@@ -65,3 +65,32 @@ def jaro_distance(s1, s2):
     # Return the Jaro Similarity
     return (match / len1 + match / len2 +
             (match - t) / match) / 3.0
+
+
+# Jaro Winkler Similarity
+def jaro_winkler(s1, s2):
+    jaro_dist = jaro_distance(s1, s2)
+
+    # If the jaro Similarity is above a threshold
+    if jaro_dist > 0.7:
+
+        # Find the length of common prefix
+        prefix = 0
+
+        for i in range(min(len(s1), len(s2))):
+
+            # If the characters match
+            if s1[i] == s2[i]:
+                prefix += 1
+
+            # Else break
+            else:
+                break
+
+        # Maximum of 4 characters are allowed in prefix
+        prefix = min(4, prefix)
+
+        # Calculate jaro winkler Similarity
+        jaro_dist += 0.1 * prefix * (1 - jaro_dist)
+
+    return jaro_dist
