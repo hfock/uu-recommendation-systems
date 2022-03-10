@@ -4,10 +4,10 @@ import pandas as pd
 
 
 def init_session_keys():
-    st.session_state[c.CPLXTY] = c.CPLXTY
-    st.session_state[c.DVRSTY] = c.DVRSTY
-    st.session_state[c.ID] = 1
-    st.session_state[c.CPLXTY_MODE] = c.DEFAULT
+    if c.ID not in st.session_state:
+        st.session_state[c.ID] = 1
+    if c.CPLXTY_MODE not in st.session_state:
+        st.session_state[c.CPLXTY_MODE] = c.DEFAULT
 
 
 # latin-1

@@ -1,13 +1,9 @@
 import constant as c
-import pandas as pd
 import streamlit as st
 
 from CurrentShow import CurShow
 
 from random import random
-
-def display_selected_item(cur_show: CurShow):
-    pass
 
 
 def display_selected_item_advanced(cur_show: CurShow):
@@ -23,11 +19,8 @@ def display_selected_item_advanced(cur_show: CurShow):
         st.title(cur_show.title)
         st.caption(cur_show.desc)
         st.caption(f'Category: {cur_show.category}')
+        st.caption(cur_show.keywords)
 
-        with st.expander("More information"):
-            st.markdown(f'''
-            Keywords: {cur_show.keywords}
-            ''')
     with st.expander("Synopses"):
         st.text(cur_show.syno_l)
 
@@ -42,51 +35,28 @@ def recommendations(df):
 
         # convert df rows to dict lists
         items = df.to_dict(orient='records')
-
         # apply tile_item to each column-item tuple (created with python 'zip')
         any(tile_item(x[0], x[1]) for x in zip(columns, items))
 
 
 def tile_item(column, item):
     with column:
-        st.button('📖', key=random(), on_click=select_book, args=(item['ISBN'],))
-        st.image(item['Image-URL-M'], use_column_width='always')
-        st.caption(item['Book-Title'])
-
-
-# set episode session state
-def select_book(isbn):
-    st.session_state['ISBN'] = isbn
+        st.button('📖', key=random(), on_click=select_show, args=(item['index'],))
+        st.image(item['image_l'], use_column_width='always')
+        st.caption(item['title'])
 
 
 def select_show(id):
+    print(f'input value is {id}')
     st.session_state[c.ID] = id
-
-
-def diversity_filter():
-    pass
-    # if st.session_state[DVRSTY] == 'Low':
-    # apply this
-    #   pass
-    # else:
-    # apply that
-    #   with st.expander("Recommendations based most reviewed"):
-    #      most_reviewed(df_book)
 
 
 def sidebar():
     with st.sidebar:
         st.session_state[c.CPLXTY_MODE] = st.selectbox('User Mode', [c.DEFAULT, c.ADVANCED])
 
-        if st.session_state[c.CPLXTY_MODE] == c.CPLXTY:
+        if st.session_state[c.CPLXTY_MODE] == c.ADVANCED:
             pass
-
-
-
-def most_reviewed(df_books: pd.DataFrame, most_reviewed: pd.DataFrame):
-    df = most_reviewed
-    df = df.merge(df_books, on='ISBN')
-    recommendations(df)
 
 
 def make_markdown_iteration(values):

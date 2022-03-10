@@ -1,6 +1,3 @@
-CPLXTY = 'Complexity'
-DVRSTY = 'Diversity'
-
 CPLXTY_MODE = 'complexity_mode'
 DEFAULT = 'default'
 ADVANCED = 'advanced'

@@ -10,6 +10,7 @@ import view as vw
 from CurrentShow import CurShow
 
 if __name__ == '__main__':
+    print('Refresh')
     st.set_page_config(layout="wide")
 
     bbc = md.load_csv(f'{c.DATA_BBC}bbc_data.csv', delimiter=';')
@@ -18,9 +19,9 @@ if __name__ == '__main__':
 
     md.init_session_keys()
 
-    bbc_entry = df[df['index'] == st.session_state[c.ID]].iloc[0]
-    cur_show = CurShow(bbc_entry)
-    #
+    print(f'Session state id {st.session_state[c.ID]}')
+    cur_show = CurShow(df[df[c.ID] == st.session_state[c.ID]].iloc[0])
     vw.display_selected_item_advanced(cur_show)
     vw.sidebar()
 
+    vw.recommendations(df.iloc[0:6])
