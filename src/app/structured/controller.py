@@ -1,30 +1,26 @@
 # Import
 import pandas as pd
 import streamlit as st
-from constant import DATA_BOOK
+import constant as c
 
 # import own files
-import model
-import view
+import model as md
+import view as vw
 
-
-class Controller:
-
-    def __init__(self, streamlit, ):
-        self.md = model.Model(streamlit)
-        self.vw = view.View(streamlit)
-
+from CurrentShow import CurShow
 
 if __name__ == '__main__':
     st.set_page_config(layout="wide")
 
-    ct = Controller(st)
-    md = ct.md
-    vw = ct.vw
+    bbc = md.load_csv(f'{c.DATA_BBC}bbc_data.csv', delimiter=';')
+    bbc_images = md.load_csv(f'{c.DATA_BBC}bbc_images.csv', delimiter=';')
+    df = bbc.merge(bbc_images, on='index')
 
+    md.init_session_keys()
+
+    bbc_entry = df[df['index'] == st.session_state[c.ID]].iloc[0]
+    cur_show = CurShow(bbc_entry)
+    #
+    vw.display_selected_item_advanced(cur_show)
     vw.sidebar()
 
-    pd_books = model.load(f'{DATA_BOOK}BX-Books.csv')
-    most_reviewed = model.load(f'{DATA_BOOK}recommendations-most-reviewed.csv')
-
-    vw.most_reviewed(most_reviewed, pd_books)

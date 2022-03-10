@@ -1,55 +1,96 @@
-from constant import CPLXTY, DVRSTY
+import constant as c
 import pandas as pd
+import streamlit as st
+
+from CurrentShow import CurShow
 
 from random import random
 
+def display_selected_item(cur_show: CurShow):
+    pass
 
-class View:
-    def __init__(self, streamlitObject):
-        self.st = streamlitObject
 
-    def recommendations(self, df):
-        # check the number of items
-        nbr_items = df.shape[0]
+def display_selected_item_advanced(cur_show: CurShow):
+    # create a cover and info column to display the selected book
+    cover, info = st.columns([2, 2])
 
-        if nbr_items != 0:
-            # create columns with the corresponding number of items
-            columns = self.st.columns(nbr_items)
+    with cover:
+        # display the image
+        st.image(cur_show.image_l)
 
-            # convert df rows to dict lists
-            items = df.to_dict(orient='records')
+    with info:
+        # display the book information
+        st.title(cur_show.title)
+        st.caption(cur_show.desc)
+        st.caption(f'Category: {cur_show.category}')
 
-            # apply tile_item to each column-item tuple (created with python 'zip')
-            any(self.tile_item(x[0], x[1]) for x in zip(columns, items))
+        with st.expander("More information"):
+            st.markdown(f'''
+            Keywords: {cur_show.keywords}
+            ''')
+    with st.expander("Synopses"):
+        st.text(cur_show.syno_l)
 
-    def tile_item(self, column, item):
-        with column:
-            self.st.button('📖', key=random(), on_click=self.select_book, args=(item['ISBN'],))
-            self.st.image(item['Image-URL-M'], use_column_width='always')
-            self.st.caption(item['Book-Title'])
 
-    # set episode session state
-    def select_book(self, isbn):
-        self.st.session_state['ISBN'] = isbn
+def recommendations(df):
+    # check the number of items
+    nbr_items = df.shape[0]
 
-    def diversity_filter(self):
-        pass
-        # if self.st.session_state[DVRSTY] == 'Low':
-        # apply this
-        #   pass
-        # else:
-        # apply that
-        #   with self.st.expander("Recommendations based most reviewed"):
-        #      self.most_reviewed(df_book)
+    if nbr_items != 0:
+        # create columns with the corresponding number of items
+        columns = st.columns(nbr_items)
 
-    def sidebar(self):
-        with self.st.sidebar:
-            self.st.session_state[CPLXTY] = self.st.radio(CPLXTY, ['Default', 'Advanced'])
-            self.st.session_state[DVRSTY] = self.st.radio(DVRSTY, ['Low', 'Mid', 'High'])
-            self.st.selectbox('Mood for different', ['cats', 'dogs'])
+        # convert df rows to dict lists
+        items = df.to_dict(orient='records')
 
-    def most_reviewed(self, df_books: pd.DataFrame, most_reviewed: pd.DataFrame):
-        df = most_reviewed
-        df = df.merge(df_books, on='ISBN')
-        self.recommendations(df)
+        # apply tile_item to each column-item tuple (created with python 'zip')
+        any(tile_item(x[0], x[1]) for x in zip(columns, items))
 
+
+def tile_item(column, item):
+    with column:
+        st.button('📖', key=random(), on_click=select_book, args=(item['ISBN'],))
+        st.image(item['Image-URL-M'], use_column_width='always')
+        st.caption(item['Book-Title'])
+
+
+# set episode session state
+def select_book(isbn):
+    st.session_state['ISBN'] = isbn
+
+
+def select_show(id):
+    st.session_state[c.ID] = id
+
+
+def diversity_filter():
+    pass
+    # if st.session_state[DVRSTY] == 'Low':
+    # apply this
+    #   pass
+    # else:
+    # apply that
+    #   with st.expander("Recommendations based most reviewed"):
+    #      most_reviewed(df_book)
+
+
+def sidebar():
+    with st.sidebar:
+        st.session_state[c.CPLXTY_MODE] = st.selectbox('User Mode', [c.DEFAULT, c.ADVANCED])
+
+        if st.session_state[c.CPLXTY_MODE] == c.CPLXTY:
+            pass
+
+
+
+def most_reviewed(df_books: pd.DataFrame, most_reviewed: pd.DataFrame):
+    df = most_reviewed
+    df = df.merge(df_books, on='ISBN')
+    recommendations(df)
+
+
+def make_markdown_iteration(values):
+    result = ''
+    for value in values.split(', '):
+        result = result + '\n- ' + value
+    return result
