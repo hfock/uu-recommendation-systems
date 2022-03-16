@@ -4,12 +4,13 @@ EXPLORE = 'Casual Browsing'
 ADVANCED = 'Unveiled Exploration'
 HISTORY = 'History'
 
-RADIO_OBJ = [EXPLORE, ADVANCED, HISTORY]
-
 ID = 'index'
 
-DATA_BOOK = '../../data/books/'
 DATA_BBC = '../../data/bbc/'
+
+GENRE = 'genre'
+PRIVACY = 'privacy'
+TRANSPARENCY = 'trans'
 
 TANK_MAN = '''
                                     |

@@ -17,20 +17,19 @@ def display_selected_item_advanced(cur_show: CurShow):
 
     with cover:
         # display the image
-        st.image(cur_show.image_l)
+        st.image(cur_show.img)
 
     with info:
         # display the book information
         st.title(cur_show.title)
         st.caption(cur_show.desc)
         st.caption(f'Category: {cur_show.category}')
-        st.caption(cur_show.keywords)
-
-    with st.expander("Synopses"):
-        st.text(cur_show.syno_l)
 
 
-def recommendations(df):
+def recommendations(df, text=None):
+    if text:
+        st.title(text)
+
     # check the number of items
     nbr_items = df.shape[0]
 
@@ -47,29 +46,36 @@ def recommendations(df):
 def tile_item(column, item):
     with column:
         st.button('🕶', key=random(), on_click=select_show, args=(item['index'],))
-        st.image(item['image_l'], use_column_width='always')
-        st.caption(item['title'])
+        st.image(item['img'], use_column_width='always')
+        st.markdown(f'''
+        #### {item["title"]}
+        {item["category"]}
+        ''')
+
+
+def record_history(id):
+    if not st.session_state[c.PRIVACY]:
+        st.session_state[c.HISTORY].append(id)
 
 
 def select_show(id):
     print(f'input value is {id}')
-    st.session_state[c.HISTORY].append(id)
+    record_history(id)
     st.session_state[c.ID] = id
 
 
-def sidebar():
+def sidebar(df):
     st.session_state[c.MODE] = st.sidebar.radio('Go To', [c.EXPLORE, c.ADVANCED, c.HISTORY])
+    st.session_state[c.GENRE] = st.sidebar.selectbox('Genre', df['category'].sort_values().unique())
+    st.session_state[c.TRANSPARENCY] = st.sidebar.checkbox('Transparency Mode')
+    st.session_state[c.PRIVACY] = st.sidebar.checkbox('Privacy Mode')
+    if st.session_state[c.PRIVACY]:
+        st.sidebar.info('You are now in the privacy mode, '
+                        'nothing is now recorded from you, but you cannot use the features that need your data.')
     st.sidebar.info('This is a mid-fidelity prototype. It is not possible to play any video.')
 
 
-def make_markdown_iteration(values):
-    result = ''
-    for value in values.split(', '):
-        result = result + '\n- ' + value
-    return result
-
-
-def exploration(df_adv, ):
+def exploration(df_adv):
     selection = aggrid_interactive_table(df_adv)
     if selection:
         if selection["selected_rows"]:
@@ -87,7 +93,7 @@ def exploration(df_adv, ):
             st.write('To watch the movie click the glasses')
             if st.button('🕶'):
                 st.session_state[c.MODE] = c.EXPLORE
-                st.session_state[c.HISTORY].append(sel_show.index)
+                record_history(sel_show.index)
 
 
 def aggrid_interactive_table(df: pd.DataFrame):
