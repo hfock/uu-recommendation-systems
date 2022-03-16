@@ -38,3 +38,24 @@ class CurShow:
         self.channel = df['channel']
 
 
+class CurShowJson:
+    index = None
+    title = None
+    desc = None
+
+    category = None
+
+    channel = None
+
+    release_year = None
+    duration = None
+
+    def __init__(self, json):
+        self.index = json['Index']
+        self.title = json['Title']
+        self.desc = json['Description']
+        self.category = json['Category']
+        self.channel = json['Channel']
+        self.release_year = json['Release Year']
+        self.duration = json['Duration in Minutes']
+

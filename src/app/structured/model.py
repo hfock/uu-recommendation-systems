@@ -6,8 +6,10 @@ import pandas as pd
 def init_session_keys():
     if c.ID not in st.session_state:
         st.session_state[c.ID] = 1
-    if c.CPLXTY_MODE not in st.session_state:
-        st.session_state[c.CPLXTY_MODE] = c.DEFAULT
+    if c.MODE not in st.session_state:
+        st.session_state[c.MODE] = c.EXPLORE
+    if c.HISTORY not in st.session_state:
+        st.session_state[c.HISTORY] = []
 
 
 # latin-1

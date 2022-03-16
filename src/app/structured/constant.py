@@ -1,6 +1,10 @@
-CPLXTY_MODE = 'complexity_mode'
-DEFAULT = 'default'
-ADVANCED = 'advanced'
+MODE = 'mode'
+
+EXPLORE = 'Casual Browsing'
+ADVANCED = 'Unveiled Exploration'
+HISTORY = 'History'
+
+RADIO_OBJ = [EXPLORE, ADVANCED, HISTORY]
 
 ID = 'index'
 

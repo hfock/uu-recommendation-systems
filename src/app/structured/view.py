@@ -1,9 +1,14 @@
 import constant as c
 import streamlit as st
+import pandas as pd
 
-from CurrentShow import CurShow
+
+from CurrentShow import CurShow, CurShowJson
 
 from random import random
+
+from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid.shared import GridUpdateMode
 
 
 def display_selected_item_advanced(cur_show: CurShow):
@@ -41,22 +46,20 @@ def recommendations(df):
 
 def tile_item(column, item):
     with column:
-        st.button('📖', key=random(), on_click=select_show, args=(item['index'],))
+        st.button('🕶', key=random(), on_click=select_show, args=(item['index'],))
         st.image(item['image_l'], use_column_width='always')
         st.caption(item['title'])
 
 
 def select_show(id):
     print(f'input value is {id}')
+    st.session_state[c.HISTORY].append(id)
     st.session_state[c.ID] = id
 
 
 def sidebar():
-    with st.sidebar:
-        st.session_state[c.CPLXTY_MODE] = st.selectbox('User Mode', [c.DEFAULT, c.ADVANCED])
-
-        if st.session_state[c.CPLXTY_MODE] == c.ADVANCED:
-            pass
+    st.session_state[c.MODE] = st.sidebar.radio('Go To', [c.EXPLORE, c.ADVANCED, c.HISTORY])
+    st.sidebar.info('This is a mid-fidelity prototype. It is not possible to play any video.')
 
 
 def make_markdown_iteration(values):
@@ -64,3 +67,49 @@ def make_markdown_iteration(values):
     for value in values.split(', '):
         result = result + '\n- ' + value
     return result
+
+
+def exploration(df_adv, ):
+    selection = aggrid_interactive_table(df_adv)
+    if selection:
+        if selection["selected_rows"]:
+            sel_show = CurShowJson(selection["selected_rows"][0])
+            st.session_state[c.ID] = sel_show.index
+            st.markdown(f'''
+            ## {sel_show.title}
+            > {sel_show.desc}
+            ***
+            Category **{sel_show.category}** produced from the channel **{sel_show.channel}**
+            
+            Duration **{sel_show.duration} Minutes**
+            ''')
+
+            st.write('To watch the movie click the glasses')
+            if st.button('🕶'):
+                st.session_state[c.MODE] = c.EXPLORE
+                st.session_state[c.HISTORY].append(sel_show.index)
+
+
+def aggrid_interactive_table(df: pd.DataFrame):
+    """Creates an st-aggrid interactive table based on a dataframe.
+    Args:
+        df (pd.DataFrame]): Source dataframe
+    Returns:
+        dict: The selected row
+    """
+    options = GridOptionsBuilder.from_dataframe(
+        df, enableRowGroup=True, enableValue=True, enablePivot=True
+    )
+
+    options.configure_side_bar()
+
+    options.configure_selection("single")
+    selection = AgGrid(
+        df,
+        enable_enterprise_modules=True,
+        gridOptions=options.build(),
+        theme="light",
+        update_mode=GridUpdateMode.MODEL_CHANGED,
+        allow_unsafe_jscode=True,
+    )
+    return selection
