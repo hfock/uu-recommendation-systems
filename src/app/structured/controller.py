@@ -6,6 +6,7 @@ import constant as c
 # import own files
 import model as md
 import view as vw
+import random
 
 from CurrentShow import CurShow
 
@@ -26,28 +27,35 @@ def entry_by_id(df_input: pd.DataFrame, id_input: int):
 def page_load():
     if st.session_state[c.MODE] == c.EXPLORE:
         cur_show = CurShow(entry_by_id(df, st.session_state[c.ID]))
-        vw.display_selected_item_advanced(cur_show)
+        vw.display_selected_item(cur_show)
 
-        number_of_items = 8
+        number_of_items = 6
         recom_entries = df.iloc[sim_title(df_cosin, st.session_state[c.ID], number_of_items), :]
         vw.recommendations(recom_entries,
-                           'Recommendations based on the movie you just watched')
+                           "Recommendations based on the current content's similarity")
 
-        # recom_on_genre = df.iloc[sim_title_by_genre(df, df_cosin, st.session_state[c.ID], number_of_items)]
-        # vw.recommendations(recom_on_genre,
-        #                    'Recommendations based on the selected genre')
+        if st.session_state[c.DIVERSITY]:
+            recom_on_artifical = df.iloc[sim_title_artifical_cluster(df, st.session_state[c.ID], number_of_items), :]
+            vw.recommendations(recom_on_artifical,
+                               "Recommendations based on current content's domain of interest")
+
+        if st.session_state[c.GENRE_FILTER]:
+            recom_on_genre = df.iloc[sim_title_by_genre(df, df_cosin, st.session_state[c.ID], number_of_items)]
+            vw.recommendations(recom_on_genre,
+                               'Recommendations based on the current content and selected genre')
 
         if not st.session_state[c.PRIVACY]:
             hist_recom_entries = df.iloc[sim_title_by_many(df_cosin, st.session_state[c.HISTORY], number_of_items)]
             vw.recommendations(hist_recom_entries,
                                'Recommendations based on your history')
+
     elif st.session_state[c.MODE] == c.ADVANCED:
         vw.exploration(df_adv)
 
     elif st.session_state[c.MODE] == c.HISTORY:
         if st.session_state[c.HISTORY]:
             for entry_id in st.session_state[c.HISTORY][::-1]:
-                vw.display_selected_item_advanced(CurShow(entry_by_id(df, entry_id)))
+                vw.display_history(CurShow(entry_by_id(df, entry_id)))
         else:
             st.write('No History yet')
     else:
@@ -56,6 +64,18 @@ def page_load():
 
 def sim_title(df_cosin_similarity, index: int, number_of_recom):
     recoms = df_cosin_similarity.loc[index].sort_values(ascending=False).index.tolist()[1:number_of_recom]
+    return list(map(int, recoms))
+
+
+def sim_title_artifical_cluster(df_bbc, index: int, number_of_recom):
+    artifical_cat = df_bbc[df_bbc['index'] == index]['adv_category'].iloc[0]
+    recoms = df_bbc[df_bbc['adv_category'] == artifical_cat]
+
+    list_of_available_items = recoms.index.tolist()
+    print(list_of_available_items)
+    if number_of_recom > len(list_of_available_items):
+        number_of_recom = len(list_of_available_items)
+    recoms = random.sample(list_of_available_items, number_of_recom)
     return list(map(int, recoms))
 
 
@@ -68,10 +88,14 @@ def sim_title_by_many(df_cosin_similarity, indices: list, number_of_recom):
 
 
 def sim_title_by_genre(df, df_cosin_similarity, index, number_of_recom):
+    # Getting all the items that have the specific genre
     fitting_genre = df[df['category'] == st.session_state[c.GENRE]]
-    print(len(fitting_genre))
-    df_cosin_genre_exc = df_cosin_similarity.iloc[[fitting_genre.index, index]]
-    recoms = df_cosin_genre_exc.loc[index].sort_values(ascending=False).index.tolist()[1:number_of_recom]
+    # Get only the column of the wanted index
+    cos_col_index = df_cosin_similarity.loc[index]
+    # Remove all entries that are not within the selected genre
+    genre_selected = cos_col_index.iloc[fitting_genre.index]
+    # Sort them ascending and take the top x values
+    recoms = genre_selected.sort_values(ascending=False).index.tolist()[1:number_of_recom]
     return list(map(int, recoms))
 
 
@@ -87,7 +111,3 @@ if __name__ == '__main__':
     vw.sidebar(df)
 
     page_load()
-
-
-
-

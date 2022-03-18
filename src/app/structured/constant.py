@@ -8,9 +8,11 @@ ID = 'index'
 
 DATA_BBC = '../../data/bbc/'
 
+GENRE_FILTER = 'genre_filter'
 GENRE = 'genre'
 PRIVACY = 'privacy'
 TRANSPARENCY = 'trans'
+DIVERSITY = 'diversity'
 
 TANK_MAN = '''
                                     |

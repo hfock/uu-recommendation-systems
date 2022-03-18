@@ -2,7 +2,6 @@ import constant as c
 import streamlit as st
 import pandas as pd
 
-
 from CurrentShow import CurShow, CurShowJson
 
 from random import random
@@ -11,24 +10,29 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 
 
-def display_selected_item_advanced(cur_show: CurShow):
-    # create a cover and info column to display the selected book
-    cover, info = st.columns([2, 2])
-
-    with cover:
-        # display the image
+def display_selected_item(cur_show: CurShow):
+    st.title(cur_show.title)
+    left, middle, right = st.columns([1, 3, 1])
+    with middle:
         st.image(cur_show.img)
+    st.caption(cur_show.desc)
+    st.caption(f'Category: {cur_show.category}')
 
-    with info:
-        # display the book information
-        st.title(cur_show.title)
+
+def display_history(cur_show: CurShow):
+    left, right = st.columns([2, 2])
+
+    with left:
+        st.image(cur_show.img)
+    with right:
         st.caption(cur_show.desc)
         st.caption(f'Category: {cur_show.category}')
+        st.button('🕶', key=random(), on_click=select_show, args=(cur_show.index, False,))
 
 
 def recommendations(df, text=None):
     if text:
-        st.title(text)
+        st.markdown(f'#### {text}')
 
     # check the number of items
     nbr_items = df.shape[0]
@@ -48,8 +52,8 @@ def tile_item(column, item):
         st.button('🕶', key=random(), on_click=select_show, args=(item['index'],))
         st.image(item['img'], use_column_width='always')
         st.markdown(f'''
-        #### {item["title"]}
-        {item["category"]}
+        *{item["category"]}*
+        ##### {item["title"]}
         ''')
 
 
@@ -58,21 +62,34 @@ def record_history(id):
         st.session_state[c.HISTORY].append(id)
 
 
-def select_show(id):
-    print(f'input value is {id}')
-    record_history(id)
+def select_show(id, history=True):
+    if history:
+        record_history(id)
     st.session_state[c.ID] = id
 
 
 def sidebar(df):
-    st.session_state[c.MODE] = st.sidebar.radio('Go To', [c.EXPLORE, c.ADVANCED, c.HISTORY])
-    st.session_state[c.GENRE] = st.sidebar.selectbox('Genre', df['category'].sort_values().unique())
-    st.session_state[c.TRANSPARENCY] = st.sidebar.checkbox('Transparency Mode')
-    st.session_state[c.PRIVACY] = st.sidebar.checkbox('Privacy Mode')
-    if st.session_state[c.PRIVACY]:
-        st.sidebar.info('You are now in the privacy mode, '
-                        'nothing is now recorded from you, but you cannot use the features that need your data.')
     st.sidebar.info('This is a mid-fidelity prototype. It is not possible to play any video.')
+    st.session_state[c.MODE] = st.sidebar.radio('Go To', [c.EXPLORE, c.ADVANCED, c.HISTORY])
+    st.session_state[c.GENRE_FILTER] = genre_filter = st.sidebar.checkbox('Genre')
+    if genre_filter:
+        st.session_state[c.GENRE] = st.sidebar.selectbox('Genre', df['category'].sort_values().unique())
+    st.session_state[c.PRIVACY] = st.sidebar.checkbox('Privacy Mode')
+    if st.session_state[c.TRANSPARENCY]:
+        if st.session_state[c.PRIVACY]:
+            st.sidebar.info('You are now in the privacy mode, '
+                            'nothing is now recorded from you, but you cannot use the features that need your data.')
+    st.session_state[c.DIVERSITY] = st.sidebar.checkbox('Diversity Mode', value=True)
+    if st.session_state[c.TRANSPARENCY]:
+        if st.session_state[c.DIVERSITY]:
+            st.sidebar.info('You are now in the diversity mode, '
+                            'On your casual browsing view you now witness recommendations that are still based '
+                            'on the content you have selected at the moment but in a '
+                            'more broad horizon extending manner.')
+    st.session_state[c.TRANSPARENCY] = st.sidebar.checkbox('Transparency Mode')
+    if st.session_state[c.TRANSPARENCY]:
+        st.sidebar.info('You are now in the transparency mode, you will see information like this in many occasions.'
+                        'The brief explanation should help you understand what is what doing and why.')
 
 
 def exploration(df_adv):

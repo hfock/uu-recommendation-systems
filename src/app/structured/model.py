@@ -16,6 +16,12 @@ def init_session_keys():
         st.session_state[c.TRANSPARENCY] = False
     if c.PRIVACY not in st.session_state:
         st.session_state[c.PRIVACY] = False
+    if c.GENRE_FILTER not in st.session_state:
+        st.session_state[c.GENRE_FILTER] = False
+    if c.GENRE not in st.session_state:
+        st.session_state[c.GENRE] = 'Arts'
+    if c.DIVERSITY not in st.session_state:
+        st.session_state[c.DIVERSITY] = True
 
 
 # latin-1
