@@ -1,3 +1,3 @@
 # uu-recommendation-systems
 
-This repository is for the individual assignment within Personal Recommendation System Lecture.
+This repository contains the mid-fidelity prototype for the Personalisation for (Public) Media's individual assignment
